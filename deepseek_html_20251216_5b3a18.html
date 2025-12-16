@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My University Timetable</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 i {
+            color: #f1c40f;
+        }
+        
+        .current-class {
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #3498db;
+        }
+        
+        .current-class h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .class-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .info-item i {
+            color: #3498db;
+            font-size: 1.2rem;
+            width: 30px;
+        }
+        
+        .timetable-container {
+            background-color: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+        }
+        
+        .timetable-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .timetable-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .day-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .day-btn {
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #ddd;
+        }
+        
+        .day-btn.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+        
+        .day-btn:hover {
+            background-color: #d5dbdb;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background-color: #34495e;
+            color: white;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        th {
+            font-weight: 600;
+        }
+        
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .course-code {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .course-title {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .current-time {
+            background-color: #e8f4fc;
+            border-left: 4px solid #3498db;
+        }
+        
+        .time-slot {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 20px;
+            font-size: 0.9rem;
+            border-top: 1px solid #eaeaea;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .timetable-container {
+                overflow-x: auto;
+            }
+            
+            table {
+                min-width: 700px;
+            }
+            
+            .class-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        .no-class {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .highlight {
+            background-color: #fffde7;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-calendar-alt"></i> My University Timetable</h1>
+        <p>Access your schedule anytime, anywhere. Current class details are highlighted below.</p>
+    </div>
+    
+    <div class="current-class">
+        <h2><i class="fas fa-clock"></i> Current/Next Class</h2>
+        <div id="currentClassInfo">
+            <!-- Current class info will be dynamically inserted here -->
+        </div>
+    </div>
+    
+    <div class="timetable-container">
+        <div class="timetable-header">
+            <h2><i class="fas fa-table"></i> Complete Weekly Schedule</h2>
+            <div class="controls">
+                <button id="todayBtn"><i class="fas fa-calendar-day"></i> Today</button>
+                <button id="allDaysBtn"><i class="fas fa-calendar-week"></i> All Days</button>
+            </div>
+        </div>
+        
+        <div class="day-filter">
+            <span class="day-btn active" data-day="all">All Days</span>
+            <span class="day-btn" data-day="MON">Monday</span>
+            <span class="day-btn" data-day="TUE">Tuesday</span>
+            <span class="day-btn" data-day="WED">Wednesday</span>
+            <span class="day-btn" data-day="THU">Thursday</span>
+            <span class="day-btn" data-day="FRI">Friday</span>
+        </div>
+        
+        <div id="timetable">
+            <!-- Timetable will be dynamically generated here -->
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Made with <i class="fas fa-heart" style="color: #e74c3c;"></i> for easy access to your university schedule</p>
+        <p>Last updated: <span id="currentDate"></span></p>
+    </div>
+    
+    <script>
+        // Timetable data
+        const timetableData = [
+            { code: "SE-201", section: "AC", title: "Data Structures Lab", credits: 1, instructor: "Dr Zahid Iqbal", day: "MON", time: "10:15-11:45", room: "B214" },
+            { code: "SE-308", section: "AC", title: "Information Security", credits: 3, instructor: "Sahar Shehzadi", day: "MON", time: "11:45-13:15", room: "B217" },
+            { code: "SE-200", section: "AC", title: "Data Structures", credits: 3, instructor: "Dr Zahid Iqbal", day: "MON", time: "13:30-15:00", room: "B217" },
+            { code: "GESE-102", section: "AD", title: "Applied Physics", credits: 3, instructor: "Aqsa Waqar", day: "TUE", time: "08:45-10:15", room: "B202" },
+            { code: "SE-206", section: "AC", title: "Database Systems Lab", credits: 1, instructor: "Adeel Shahzad", day: "TUE", time: "10:15-11:45", room: "B217" },
+            { code: "GESE-101", section: "AC", title: "Professional Practices", credits: 2, instructor: "Umme Ammara Tariq", day: "TUE", time: "11:45-13:15", room: "B217" },
+            { code: "MATH-110", section: "AC", title: "Multivariable Calculus", credits: 3, instructor: "Muqddas Shabbir", day: "TUE", time: "13:30-15:00", room: "B5" },
+            { code: "SE-308", section: "AC", title: "Information Security", credits: 3, instructor: "Sahar Shehzadi", day: "TUE", time: "15:00-16:30", room: "B-228" },
+            { code: "GE-207", section: "U", title: "Civics and Community Engagement", credits: 2, instructor: "Erum Rizvi", day: "WED", time: "11:45-13:15", room: "B1-106" },
+            { code: "SE-204", section: "AC", title: "Database Systems", credits: 3, instructor: "Adeel Shahzad", day: "WED", time: "13:30-15:00", room: "B217" },
+            { code: "SE-201", section: "AC", title: "Data Structures Lab", credits: 1, instructor: "Dr Zahid Iqbal", day: "WED", time: "15:00-16:30", room: "B-207B" },
+            { code: "GESE-102", section: "AD", title: "Applied Physics", credits: 3, instructor: "Aqsa Waqar", day: "THU", time: "08:45-10:15", room: "B201" },
+            { code: "GESE-101", section: "AC", title: "Professional Practices", credits: 2, instructor: "Umme Ammara Tariq", day: "THU", time: "10:15-11:45", room: "B205" },
+            { code: "SE-204", section: "AC", title: "Database Systems", credits: 3, instructor: "Adeel Shahzad", day: "THU", time: "11:45-13:15", room: "B206" },
+            { code: "GE-207", section: "U", title: "Civics and Community Engagement", credits: 2, instructor: "Erum Rizvi", day: "FRI", time: "08:45-10:15", room: "S7" },
+            { code: "MATH-110", section: "AC", title: "Multivariable Calculus", credits: 3, instructor: "Muqddas Shabbir", day: "FRI", time: "11:45-13:15", room: "B206" }
+        ];
+        
+        // Days mapping
+        const dayMap = {
+            "MON": "Monday",
+            "TUE": "Tuesday",
+            "WED": "Wednesday",
+            "THU": "Thursday",
+            "FRI": "Friday"
+        };
+        
+        // Get current date and time
+        const now = new Date();
+        const currentDay = now.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+        const currentTime = now.getHours() * 60 + now.getMinutes(); // Convert to minutes since midnight
+        
+        // Format time for display
+        function formatTime(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+        }
+        
+        // Parse time string to minutes
+        function parseTime(timeStr) {
+            const [start, end] = timeStr.split('-');
+            const [startH, startM] = start.split(':').map(Number);
+            return startH * 60 + startM;
+        }
+        
+        // Find current or next class
+        function findCurrentClass() {
+            // First, check if there's a class happening right now
+            for (let classItem of timetableData) {
+                if (classItem.day === currentDay) {
+                    const [startTime, endTime] = classItem.time.split('-');
+                    const classStart = parseTime(startTime);
+                    const classEnd = parseTime(endTime);
+                    
+                    if (currentTime >= classStart && currentTime <= classEnd) {
+                        return { classItem, status: "current" };
+                    }
+                }
+            }
+            
+            // If no current class, find the next class today
+            let nextClassToday = null;
+            for (let classItem of timetableData) {
+                if (classItem.day === currentDay) {
+                    const classStart = parseTime(classItem.time.split('-')[0]);
+                    if (classStart > currentTime) {
+                        if (!nextClassToday || classStart < parseTime(nextClassToday.time.split('-')[0])) {
+                            nextClassToday = classItem;
+                        }
+                    }
+                }
+            }
+            
+            if (nextClassToday) {
+                return { classItem: nextClassToday, status: "next" };
+            }
+            
+            // If no more classes today, find the first class tomorrow or next weekday
+            const daysOrder = ["MON", "TUE", "WED", "THU", "FRI"];
+            const currentDayIndex = daysOrder.indexOf(currentDay);
+            
+            for (let i = 1; i <= 5; i++) {
+                const nextDayIndex = (currentDayIndex + i) % 5;
+                const nextDay = daysOrder[nextDayIndex];
+                
+                let earliestClass = null;
+                for (let classItem of timetableData) {
+                    if (classItem.day === nextDay) {
+                        if (!earliestClass || parseTime(classItem.time.split('-')[0]) < parseTime(earliestClass.time.split('-')[0])) {
+                            earliestClass = classItem;
+                        }
+                    }
+                }
+                
+                if (earliestClass) {
+                    return { classItem: earliestClass, status: "next" };
+                }
+            }
+            
+            return null;
+        }
+        
+        // Display current/next class
+        function displayCurrentClass() {
+            const currentClass = findCurrentClass();
+            const container = document.getElementById('currentClassInfo');
+            
+            if (!currentClass) {
+                container.innerHTML = '<div class="no-class">No classes scheduled for the rest of the week.</div>';
+                return;
+            }
+            
+            const { classItem, status } = currentClass;
+            const statusText = status === "current" ? "Happening Now" : "Up Next";
+            const statusClass = status === "current" ? "current" : "next";
+            const statusIcon = status === "current" ? "fa-play-circle" : "fa-arrow-circle-right";
+            
+            container.innerHTML = `
+                <div class="class-info">
+                    <div class="info-item">
+                        <i class="fas ${statusIcon}"></i>
+                        <div>
+                            <strong>Status:</strong> <span class="status ${statusClass}">${statusText}</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-book"></i>
+                        <div>
+                            <strong>Course:</strong> ${classItem.code} - ${classItem.title}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-user-tie"></i>
+                        <div>
+                            <strong>Instructor:</strong> ${classItem.instructor}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-calendar-day"></i>
+                        <div>
+                            <strong>Day & Time:</strong> ${dayMap[classItem.day]}, ${classItem.time}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <strong>Location:</strong> ${classItem.room}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <strong>Duration:</strong> ${classItem.credits} credit hour(s)
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Generate timetable HTML
+        function generateTimetable(filterDay = "all") {
+            const container = document.getElementById('timetable');
+            
+            // Filter data if needed
+            const filteredData = filterDay === "all" 
+                ? timetableData 
+                : timetableData.filter(item => item.day === filterDay);
+            
+            // Sort by day and time
+            const daysOrder = ["MON", "TUE", "WED", "THU", "FRI"];
+            filteredData.sort((a, b) => {
+                if (a.day !== b.day) {
+                    return daysOrder.indexOf(a.day) - daysOrder.indexOf(b.day);
+                }
+                return parseTime(a.time.split('-')[0]) - parseTime(b.time.split('-')[0]);
+            });
+            
+            if (filteredData.length === 0) {
+                container.innerHTML = '<div class="no-class">No classes scheduled for this day.</div>';
+                return;
+            }
+            
+            let html = '<table>';
+            html += `
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Time</th>
+                        <th>Course Code</th>
+                        <th>Course Title</th>
+                        <th>Instructor</th>
+                        <th>Room</th>
+                        <th>Credits</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+            
+            filteredData.forEach(classItem => {
+                const isCurrent = (classItem.day === currentDay) && 
+                                 (currentTime >= parseTime(classItem.time.split('-')[0]) && 
+                                  currentTime <= parseTime(classItem.time.split('-')[1]));
+                
+                const rowClass = isCurrent ? 'current-time' : '';
+                
+                html += `
+                    <tr class="${rowClass}">
+                        <td><strong>${dayMap[classItem.day]}</strong></td>
+                        <td class="time-slot">${classItem.time}</td>
+                        <td>
+                            <div class="course-code">${classItem.code} (${classItem.section})</div>
+                        </td>
+                        <td>
+                            <div>${classItem.title}</div>
+                        </td>
+                        <td>${classItem.instructor}</td>
+                        <td>${classItem.room}</td>
+                        <td>${classItem.credits}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+        
+        // Set current date in footer
+        function setCurrentDate() {
+            const dateElement = document.getElementById('currentDate');
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            dateElement.textContent = now.toLocaleDateString('en-US', options);
+        }
+        
+        // Initialize the app
+        function initApp() {
+            displayCurrentClass();
+            generateTimetable();
+            setCurrentDate();
+            
+            // Set up day filter buttons
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active button
+                    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Get selected day
+                    const selectedDay = this.getAttribute('data-day');
+                    generateTimetable(selectedDay);
+                });
+            });
+            
+            // Set up control buttons
+            document.getElementById('todayBtn').addEventListener('click', function() {
+                document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector(`.day-btn[data-day="${currentDay}"]`).classList.add('active');
+                generateTimetable(currentDay);
+            });
+            
+            document.getElementById('allDaysBtn').addEventListener('click', function() {
+                document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector('.day-btn[data-day="all"]').classList.add('active');
+                generateTimetable();
+            });
+        }
+        
+        // Run when page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
